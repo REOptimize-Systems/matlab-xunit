@@ -138,7 +138,11 @@ elseif verbose
 else
     monitor = TestRunDisplay(logfile_handle);
 end
-did_pass = suite.run(monitor, throw);
+[did_pass, info] = suite.run(monitor, throw);
+
+fprintf ('\nTest run summary:\n');
+displaytable (info.Results, 'ColHeadings', {'Test Result'}, 'RowHeadings', info.TestNames);
+fprintf ('\n');
 
 if nargout > 0
     out = did_pass;

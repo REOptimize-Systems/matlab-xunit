@@ -66,7 +66,7 @@ classdef TestSuite < TestComponent
             end
         end
         
-        function did_pass_out = run(self, monitor, throw)
+        function [did_pass_out, info] = run(self, monitor, throw)
             %run Execute test cases in test suite
             %   did_pass = suite.run() executes all test cases in the test
             %   suite, returning a logical value indicating whether or not all
@@ -85,9 +85,17 @@ classdef TestSuite < TestComponent
             
             self.setUp();
             
+            info.TestNames = {};
+            info.Results = {};
             for k = 1:numel(self.TestComponents)
                 this_component_passed = self.TestComponents{k}.run(monitor, throw);
                 did_pass = did_pass && this_component_passed;
+                info.TestNames{k,1} = self.TestComponents{k}.Name;
+                if this_component_passed
+                    info.Results{k,1} = 'PASS';
+                else
+                    info.Results{k,1} = 'FAIL';
+                end
             end
             
             self.tearDown();
@@ -172,13 +180,13 @@ classdef TestSuite < TestComponent
             suite.Name = class_name;
             suite.Location = which(class_name);
             
-            methods = getClassMethods(class_name);
-            for k = 1:numel(methods)
-                if methodIsConstructor(methods{k})
+            allmethods = getClassMethods(class_name);
+            for k = 1:numel(allmethods)
+                if methodIsConstructor(allmethods{k})
                     continue
                 end
                 
-                method_name = methods{k}.Name;
+                method_name = allmethods{k}.Name;
                 if xunit.utils.isTestString(method_name)
                     suite.add(feval(class_name, method_name));
                 end
